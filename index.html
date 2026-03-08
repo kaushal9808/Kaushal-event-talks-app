@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Talks 2026</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        main {
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        #category-search {
+            padding: 0.5rem;
+            width: 50%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #schedule-container {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+
+        .schedule-item {
+            border-bottom: 1px solid #ddd;
+            padding: 1rem 0;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-item h2 {
+            margin-top: 0;
+        }
+
+        .schedule-item p {
+            margin-bottom: 0;
+        }
+
+        .schedule-item .time {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-item .speakers {
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-item .categories span {
+            background: #eee;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            background: #333;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tech Talks 2026</h1>
+        <p>A one-day event filled with technical talks.</p>
+    </header>
+
+    <main>
+        <div class="search-container">
+            <input type="text" id="category-search" placeholder="Search by category...">
+        </div>
+        <div id="schedule-container"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Tech Talks</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const scheduleContainer = document.getElementById('schedule-container');
+            const searchInput = document.getElementById('category-search');
+            
+            const talks = [
+              {
+                "title": "The Future of JavaScript",
+                "speakers": ["Jane Doe"],
+                "categories": ["JavaScript", "Web Development"],
+                "description": "A deep dive into the upcoming features of JavaScript and how they will shape the future of web development."
+              },
+              {
+                "title": "CSS Grids and Flexbox: A Modern Approach",
+                "speakers": ["John Smith"],
+                "categories": ["CSS", "Web Design"],
+                "description": "Learn how to create complex and responsive layouts with ease using modern CSS features like Grid and Flexbox."
+              },
+              {
+                "title": "Building Scalable APIs with Node.js",
+                "speakers": ["Emily White", "David Green"],
+                "categories": ["Node.js", "APIs", "Backend"],
+                "description": "An in-depth look at building scalable and maintainable APIs with Node.js, Express, and other modern tools."
+              },
+              {
+                "title": "Frontend Performance Optimization",
+                "speakers": ["Michael Black"],
+                "categories": ["Performance", "Frontend"],
+                "description": "Discover techniques and best practices for making your web applications faster and more performant."
+              },
+              {
+                "title": "Introduction to Machine Learning with Python",
+                "speakers": ["Sarah Blue"],
+                "categories": ["Machine Learning", "Python"],
+                "description": "A beginner-friendly introduction to the world of machine learning using Python and popular libraries like Scikit-learn."
+              },
+              {
+                "title": "The Rise of Serverless Architectures",
+                "speakers": ["Chris Yellow"],
+                "categories": ["Serverless", "Architecture"],
+                "description": "Explore the benefits and challenges of serverless architectures and how to build applications using serverless platforms."
+              }
+            ];
+
+            renderSchedule(talks);
+
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredTalks = talks.filter(talk => 
+                    talk.categories.some(category => category.toLowerCase().includes(searchTerm))
+                );
+                renderSchedule(filteredTalks);
+            });
+
+            function renderSchedule(talksToRender) {
+                scheduleContainer.innerHTML = '';
+                let currentTime = new Date('2026-01-01T10:00:00');
+                
+                // A map to keep track of talks to avoid duplicates in the schedule
+                const renderedTalks = new Set();
+                
+                // Create a full schedule with breaks
+                const fullSchedule = [];
+                let talkCounter = 0;
+                for (let i = 0; i < 7; i++) {
+                    if (i === 3) {
+                        fullSchedule.push({ isBreak: true, title: 'Lunch Break' });
+                    } else {
+                        if (talksToRender[talkCounter]) {
+                            fullSchedule.push(talksToRender[talkCounter]);
+                            talkCounter++;
+                        }
+                    }
+                }
+                
+                talkCounter = 0;
+                fullSchedule.forEach((item, index) => {
+                    if (item.isBreak) {
+                        const breakElement = createBreakElement(item.title, currentTime);
+                        scheduleContainer.appendChild(breakElement);
+                        currentTime.setHours(currentTime.getHours() + 1);
+                    } else {
+                        const talk = talksToRender[talkCounter];
+                        if (talk && !renderedTalks.has(talk.title)) {
+                            const scheduleItem = createTalkElement(talk, currentTime);
+                            scheduleContainer.appendChild(scheduleItem);
+                            renderedTalks.add(talk.title);
+                            talkCounter++;
+                        }
+                        
+                        currentTime.setHours(currentTime.getHours() + 1);
+                        if (index < fullSchedule.length - 1) {
+                           currentTime.setMinutes(currentTime.getMinutes() + 10);
+                        }
+                    }
+                });
+            }
+
+            function createTalkElement(talk, time) {
+                const item = document.createElement('div');
+                item.classList.add('schedule-item');
+
+                const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const endTime = new Date(time);
+                endTime.setHours(endTime.getHours() + 1);
+                const endTimeString = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                item.innerHTML = `
+                    <div class="time">${timeString} - ${endTimeString}</div>
+                    <h2>${talk.title}</h2>
+                    <div class="speakers">${talk.speakers.join(', ')}</div>
+                    <div class="categories">
+                        ${talk.categories.map(cat => `<span>${cat}</span>`).join('')}
+                    </div>
+                    <p>${talk.description}</p>
+                `;
+                return item;
+            }
+
+            function createBreakElement(title, time) {
+                const item = document.createElement('div');
+                item.classList.add('schedule-item', 'break');
+
+                const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const endTime = new Date(time);
+                endTime.setHours(endTime.getHours() + 1);
+                const endTimeString = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                item.innerHTML = `
+                    <div class="time">${timeString} - ${endTimeString}</div>
+                    <h2>${title}</h2>
+                `;
+                return item;
+            }
+        });
+    </script>
+</body>
+</html>
